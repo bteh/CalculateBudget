@@ -142,7 +142,9 @@ var DOMstrings = {
   expensesLabel: '.budget__expenses--value',
   percentageLabel: '.budget__expenses--percentage',
   container: '.container',
-  expensesPercLabel:'.item__percentage'
+  expensesPercLabel:'.item__percentage',
+  dateLabel: '.budget__title--month'
+
 }
 
   var formatNumber = function(num, type){
@@ -232,6 +234,14 @@ return {
           current.textContent = '---';
         }
        });
+
+
+    },
+    displayMonth: function(){
+      var now, date;
+      now = new Date();
+      date = new Intl.DateTimeFormat("en", { year: "numeric", month: "long" }).format(now);
+      document.querySelector(DOMstrings.dateLabel).textContent = date;
 
 
     },
@@ -330,6 +340,7 @@ var controller = (function(budgetCtrl, UICtrl){
 return {
 	init: function(){
 		console.log("Started")
+    UICtrl.displayMonth();
     UICtrl.displayBudget({
         budget: 0,
         totalInc: 0,

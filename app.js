@@ -147,33 +147,28 @@ var DOMstrings = {
 
 }
 
-  var formatNumber = function(num, type){
+
      /*
      + or - before number
      exactly 2 decimal points and comma separating the thousands
      2310,4567 -> +2,310.46
      2000 -> 2,000.00
      */
-     var numSplit, int, dec;
-     num = Math.abs(num);
-     num = num.toFixed(2);
-     numSplit = num.split('.');
+  var formatNumber = function(num, type) {
+       num = Math.abs(num).toFixed(2);
+       num = num.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+       return type === 'inc' ? '+ ' + num : '- ' + num;
+      };
 
-     int = numSplit[0];
-     if(int.length > 3){
-       int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, 3);
-     }
-
-     dec = numSplit[1];
-   
-     return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
-
-
-    };
-return {
-	getInput: function(){
-		return {
-			type: document.querySelector(DOMstrings.inputType).value, // either inc or exp
+  var nodeListForEach = function(list, callback){
+      for (var i = 0; i < list.length; i++){
+        callback(list[i], i)
+      }
+      };
+  return {
+	  getInput: function(){
+		  return {
+			  type: document.querySelector(DOMstrings.inputType).value, // either inc or exp
 		    description: document.querySelector(DOMstrings.inputDescription).value,
 		    value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
 	    }
@@ -222,11 +217,7 @@ return {
     displayPercentages: function(percentages){
       var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
 
-      var nodeListForEach = function(list, callback){
-        for (var i = 0; i < list.length; i++){
-          callback(list[i], i)
-        }
-      };
+     
       nodeListForEach(fields, function(current, index){
         if(percentages[index] > 0){
           current.textContent = percentages[index] + '%';
@@ -242,8 +233,16 @@ return {
       now = new Date();
       date = new Intl.DateTimeFormat("en", { year: "numeric", month: "long" }).format(now);
       document.querySelector(DOMstrings.dateLabel).textContent = date;
-
-
+    },
+    changedType: function(){
+      var fields = document.querySelectorAll(
+        DOMstrings.inputType + ',' +
+        DOMstrings.inputDescription + ',' +
+        DOMstrings.inputValue);
+      nodeListForEach(fields, function(cur){
+        cur.classList.toggle('red-focus');
+      })
+      document.querySelector(DOMstrings.inputBtn).classList.toggle('red')
     },
     getDomStrings: function(){
       return DOMstrings;
@@ -269,6 +268,7 @@ var controller = (function(budgetCtrl, UICtrl){
  
  });
   document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
+  document.querySelector(DOM.inputType).addEventListener('change', UICtrl.changedType);
 };
   var updateBudget = function(){
 // 1. Calculate budget
